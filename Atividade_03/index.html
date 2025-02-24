@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício do Alien</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style> body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } </style>
+</head>
+
+<body>
+    <script>
+        // Set the width and height for the game viewport
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+        // Create a config object to be used in Phaser
+        const config = {
+            type: Phaser.AUTO,
+            width: larguraJogo,
+            height: alturaJogo,
+            
+            //Adding physics into the game
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: {y:300},
+                    debug: true
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        // Start the game object
+        const game = new Phaser.Game(config);
+
+        // Initializing the alien and it's variales
+        var alien;
+        var alienVelocity = 150;
+
+        //Initializing the keyboard
+        var keyboard;
+
+        //Initializing the fire
+        var fire; 
+
+        //Initializing the turbo system
+        var turbo; 
+
+        //Initializing platforms
+        var platform;
+        var platform0;
+
+        //Initializing coins
+        var coin;
+
+        //Initialize scoreboard
+        var score = 0;
+        var scoreboard;
+
+        //Initialize the loading array 
+        let loadList = [
+            ['background', 'assets/bg.png'],
+            ['player', 'assets/alienigena.png'],
+            ['fire','assets/turbo.png'],
+            ['platform', 'assets/tijolos.png'],
+            ['coin', 'assets/moeda.png']
+        ];
+        function preload() {
+            //Load the assets into the game
+            for(var i = 0; i < loadList.length; i++) {
+                var assetName = loadList[i][0];
+                var assetFilepath = loadList[i][1];
+                this.load.image(assetName , assetFilepath);
+            }
+        }
+
+        function create() {
+            // Add background to the center of the screen
+            this.add.image(larguraJogo/2, alturaJogo/2, 'background');
+
+            //Add the fire effect
+            fire = this.add.sprite(0,0,'fire');
+            fire.setVisible(false);
+
+            // Add the alien
+            alien = this.physics.add.sprite(larguraJogo/2, 0, 'player');
+            alien.setCollideWorldBounds(true);
+
+            //Add keyboard input to the game
+            keyboard = this.input.keyboard.createCursorKeys();
+
+            //Adding a platform
+            platform = this.physics.add.staticImage(100, alturaJogo/2, 'platform');
+            this.physics.add.collider(alien,platform);
+
+            //Adding a platform
+            platform0 = this.physics.add.staticImage(larguraJogo - platform.width/2, alturaJogo/2, 'platform');
+            this.physics.add.collider(alien,platform0);
+
+            //Adding a coin
+            coin = this.physics.add.sprite(larguraJogo/2,0,'coin');
+            coin.setCollideWorldBounds(true);
+            coin.setBounce(.7);
+            this.physics.add.collider(coin, platform);
+            this.physics.add.collider(coin, platform0);
+            //Adding the scoreboard
+            scoreboard = this.add.text(50,50, 'Moedas:' + score, {fontSize:'45px', fill:'#495613'});
+            
+            //Adding collision event to the coin
+            this.physics.add.overlap(alien, coin, function() {
+                coin.setVisible(false); //Remove coin from the player view
+
+                var offset = 50;
+                var posCoin_X = Phaser.Math.RND.between(0 + offset,larguraJogo - offset); //Get a random value in the game room
+
+                coin.setPosition(posCoin_X, 100); //Set coin to new position
+
+                //Add the point and then make the new coin visible
+                score+=1;
+                scoreboard.setText('Moedas:' + score);
+                coin.setVelocityY(0);
+                coin.setVisible(true);
+            });
+        }
+
+        function update() {
+            //Handling input
+            var hInput = keyboard.right.isDown - keyboard.left.isDown;
+            var vInput = keyboard.down.isDown - keyboard.up.isDown;
+
+            //Turbo system (Fiquei com vontade de fazer quando vi o nome, sem relação com a adição do foguinho)
+            turbo = 1;
+            turbo+=keyboard.shift.isDown/2;
+
+            //Keep the fire under the alien at all times
+            fire.setPosition(alien.x,alien.y + alien.height/2);
+            fire.setVisible(false);
+
+
+            //Setting velocity to 0 if no input is given
+            alien.setVelocityX(0);
+
+            //Moving the alien based on input
+            if(Math.abs(hInput)>= 1)
+            {
+                alien.setVelocityX(hInput*alienVelocity*turbo);
+            }
+            if(Math.abs(vInput) >= 1)
+            {
+                alien.setVelocityY(vInput*alienVelocity*turbo);
+
+                if(vInput == -1){fire.setVisible(true);} 
+            }
+        }
+    </script>
+</body>
+</html>
