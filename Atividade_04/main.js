@@ -1,10 +1,11 @@
 
 //Setamos as configurações do Phaser
 import { Scene_Game } from './scenes/Scene_Game.js';
+
 var config = {
     type: Phaser.AUTO,
-    width: 640,
-    height: 640,
+    width: 960,
+    height: 960,
     physics: {
         default: 'arcade',
         arcade: {
