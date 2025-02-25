@@ -1,5 +1,5 @@
 // Coin.js
-import Phaser from '../phaser.js';
+import Phaser from '../../phaser.js';
 export default class Coin extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
         super(scene, x, y, 'coin');

@@ -1,5 +1,5 @@
 // Player.js
-import Phaser from '../phaser.js';
+import Phaser from '../../phaser.js';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {

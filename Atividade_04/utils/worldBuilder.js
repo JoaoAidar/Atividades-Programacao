@@ -1,5 +1,5 @@
-import Player from '../common/Player.js'; // Adjust the import path as necessary
-import Coin from '../common/Coin.js'; // Adjust the import path as necessary
+import Player from '../common/entities/Player.js'; // Adjust the import path as necessary
+import Coin from '../common/entities/Coin.js'; // Adjust the import path as necessary
 
 export class GameMap {
   constructor(imageSrc) {
@@ -68,7 +68,7 @@ export class GameMap {
           console.log("Pushing platform");
           gameObjects.push({ type: 'platform', x: i, y: j });
         } else if (this.matchColor(pixelData, this.colors.red)) {
-          // gameObjects.push({ type: 'lava', x: i, y: j });
+           gameObjects.push({ type: 'enemy', x: i, y: j });
         } else if (this.matchColor(pixelData, this.colors.green)) {
           // gameObjects.push({ type: 'goal', x: i, y: j });
         } else if (this.matchColor(pixelData, this.colors.blue)) {
@@ -117,11 +117,12 @@ export class GameMap {
   loadRoomFromSprite(_scene, _pathToMap) {
     const platforms = _scene.physics.add.staticGroup();
     const coins = _scene.physics.add.group();
+    const enemies = _scene.physics.add.group();
     _scene.GameMap = new GameMap(_pathToMap);
 
     _scene.GameMap.load().then(() => {
         const myObjects = _scene.GameMap.createGameObjectsArray();
-
+        
         myObjects.forEach(obj => {
             switch (obj.type) {
                 case 'player':
@@ -138,13 +139,17 @@ export class GameMap {
                     coin.body.allowGravity = false;
                     _scene.coin = coin;
                     break;
+                case 'enemy': 
+                    const enemy = enemies.create(obj.x*64 + 32,obj.y*64 + 32, 'enemy')
+                    break;
             }
         });
 
         _scene.physics.add.collider(_scene.player, platforms);
         _scene.physics.add.overlap(_scene.player, coins, (player, coin) => {
             coin.destroy();
-        });
+          });
+        _scene.physics.add.collider(enemies, platforms);
         _scene.physics.add.collider(coins, platforms);
     }).catch(err => console.error(err));
 }

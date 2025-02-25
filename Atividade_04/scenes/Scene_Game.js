@@ -1,8 +1,8 @@
 // Scene_Game.js
 import Phaser from '../phaser.js';
 import { gameMap } from '../utils/worldBuilder.js';
-import Player from '../common/Player.js'; // Adjust the import path as necessary
-import Coin from '../common/Coin.js'; // Adjust the import path as necessary
+import Player from '../common/entities/Player.js'; // Adjust the import path as necessary
+import Coin from '../common/entities/Coin.js'; // Adjust the import path as necessary
 
 export class Scene_Game extends Phaser.Scene {
     constructor() {
@@ -14,10 +14,11 @@ export class Scene_Game extends Phaser.Scene {
         this.load.image('player', 'assets/sprPlayer.png');
         this.load.image('platform', 'assets/sprPlatform.png');
         this.load.image('coin', 'assets/sprCoin.png');
+        this.load.image('enemy', 'assets/sprEnemy.png')
     }
 
     create() {
-        // Create the map
+        // Create the  
         this.map = gameMap;
         this.map.loadRoomFromSprite(this, 'assets/mapScene02.png');
         
