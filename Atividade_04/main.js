@@ -13,7 +13,8 @@ var config = {
             debug: false
         }
     },
-    scene: [Scene_MainMenu, Scene_Game]
+    scene: [Scene_MainMenu, Scene_Game],
+    baseURL: '/Atividades-Programacao/Atividade_04/',
 };
 
 //Instanciamos o jogo
