@@ -27,7 +27,7 @@ export class Scene_MainMenu extends Phaser.Scene {
         }).setOrigin(0.5);
         // Add made by text
 
-        this.add.text(480, 800, 'Feito por: João Anselmou Aidar', {
+        this.add.text(480, 800, 'Feito por: João Anselmo Aidar', {
             fontSize: '22px',
             fill: '#ffffff',
             fontFamily: 'Arial',
