@@ -22,6 +22,7 @@ export default class LevelManager {
             return;
         }
         this.currentLevel = levelNumber;
+        //this.scene.remove('Scene_Game');
         this.scene.scene.start('Scene_Game', { level: levelNumber });
     }
 

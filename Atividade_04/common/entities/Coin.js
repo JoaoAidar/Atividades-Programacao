@@ -14,10 +14,7 @@ export default class Coin extends Phaser.Physics.Arcade.Sprite {
         this.isCollected = false;
     }
 
-    collectCoin(){
-        this.isCollected = true;
-        this.destroy();
-    }
+
 }
 
 

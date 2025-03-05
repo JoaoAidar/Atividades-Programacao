@@ -1,32 +1,37 @@
 export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, speed = 100) {
-        super(scene, x, y, 'enemy'); // Create the enemy sprite
+        super(scene, x, y, 'enemy');
 
-        scene.add.existing(this);  // Add this sprite to the scene
-        scene.physics.add.existing(this); // Add physics to this sprite
+        scene.add.existing(this);
+        scene.physics.add.existing(this);  // Ensure dynamic body
 
-        this.setCollideWorldBounds(true);  // Keep it inside the world bounds
-        this.setVelocityX(speed); // Set initial velocity
+        this.setCollideWorldBounds(true);
+        this.body.onWorldBounds = true;
+        this.speed = speed;  // Make sure to store speed as a property
 
-        // Store the original speed (optional, if you want to vary it later)
-        this.speed = speed;
+        console.log("Initial Velocity:", this.body.velocity.x); // Check initial velocity
     }
 
-    update() {
-        // Move the enemy side to side
+    update(time, delta) {
+        console.log('Enemy updating:', this.x, this.y, "Velocity:", this.body.velocity.x);
         this.moveSideToSide();
     }
 
     moveSideToSide() {
-        // When the enemy hits the left or right boundary, reverse direction
+        console.log("Blocked Left:", this.body.blocked.left, "Blocked Right:", this.body.blocked.right);
+
         if (this.body.blocked.left) {
-            this.setVelocityX(Math.abs(this.speed)); // Move right
-            this.flipX = false; // Flip the sprite
+            console.log("Switching to RIGHT");
+            this.setVelocityX(Math.abs(this.speed));
         } else if (this.body.blocked.right) {
-            this.setVelocityX(-Math.abs(this.speed)); // Move left
-            this.flipX = true; // Flip the sprite
+            console.log("Switching to LEFT");
+            this.setVelocityX(-Math.abs(this.speed));
+        } else {
+            // If not blocked, keep moving in the current direction
+            if (this.body.velocity.x === 0) {
+                // If velocity is zero, start it again in a random direction
+                this.setVelocityX(Math.random() > 0.5 ? Math.abs(this.speed) : -Math.abs(this.speed));
+            }
         }
     }
-
-
 }

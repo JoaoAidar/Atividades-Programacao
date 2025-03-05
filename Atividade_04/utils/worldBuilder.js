@@ -1,163 +1,192 @@
-import Player from '../common/entities/Player.js'; // Adjust the import path as necessary
-import Enemy from '../common/entities/Enemy.js';   // Adjust the import path as necessary
+import Player from '../common/entities/Player.js';
+import Enemy from '../common/entities/Enemy.js';
+import { SpriteMapExtractor } from './spriteMapExtractor.js'; // New extraction class
 
-export class GameMap {
-  constructor(imageSrc) {
-      this.imageSrc = imageSrc;
-      // Define colors for game objects
-      this.colors = {
-          white: [255, 255, 255],
-          black: [0, 0, 0],
-          red: [255, 0, 0],    // Enemies are red
-          green: [0, 255, 0],  // Placeholder for goal or other objects
-          blue: [0, 0, 255],   // Player is blue
-          yellow: [255, 255, 0], // Coins are yellow
-          fuchsia: [255, 0, 255],
-          aqua: [0, 255, 255]
-      };
-
-      // Create the image object
-      this.img = new Image();
-      this.img.crossOrigin = "anonymous";
-      this.img.src = this.imageSrc;
-
-      // Canvas properties; will be created when the image loads
-      this.canvas = null;
-      this.ctx = null;
-  }
-
-  // Loads the image and sets up the canvas.
-  load() {
-      return new Promise((resolve, reject) => {
-          this.img.onload = () => {
-              this._createCanvas();
-              this._drawImage();
-              resolve();
-          };
-          this.img.onerror = reject;
-      });
-  }
-
-  // Private: Creates a canvas with the same dimensions as the image.
-  _createCanvas() {
-      this.canvas = document.createElement('canvas');
-      this.canvas.width = this.img.width;
-      this.canvas.height = this.img.height;
-      // Disable alpha to avoid premultiplication issues
-      this.ctx = this.canvas.getContext("2d", { alpha: false });
-  }
-
-  // Private: Draws the loaded image onto the canvas.
-  _drawImage() {
-      this.ctx.drawImage(this.img, 0, 0);
-  }
-
-  // Processes the image pixel-by-pixel to create game objects.
-  createGameObjectsArray() {
-      let gameObjects = [];
-      let width = this.img.width;
-      let height = this.img.height;
-
-      for (let i = 0; i < width; i++) {
-          for (let j = 0; j < height; j++) {
-              let pixelData = this.ctx.getImageData(i, j, 1, 1).data;
-              pixelData = this.roundPixel(pixelData);
-              
-              if (this.matchColor(pixelData, this.colors.black)) {
-                  gameObjects.push({ type: 'platform', x: i, y: j });
-              } else if (this.matchColor(pixelData, this.colors.red)) {
-                  gameObjects.push({ type: 'enemy', x: i, y: j });
-              } else if (this.matchColor(pixelData, this.colors.blue)) {
-                  gameObjects.push({ type: 'player', x: i, y: j });
-              } else if (this.matchColor(pixelData, this.colors.yellow)) {
-                  gameObjects.push({ type: 'coin', x: i, y: j });
-              }
-          }
-      }
-      return gameObjects;
-  }
-  getGameObjects() {
-    return gameObjects;
-  }
-  roundPixel(pixelRgb) {
-      const pixel = [];
-      for (let k = 0; k < 3; k++) {
-          if (pixelRgb[k] >= 254) {
-              pixel.push(255);
-          } else {
-              pixel.push(Math.round(pixelRgb[k] / 255) * 255);
-          }
-      }
-      return pixel;
-  }
-
-  matchColor(pixelRgb, targetRgb) {
-      return (
-          pixelRgb[0] === targetRgb[0] &&
-          pixelRgb[1] === targetRgb[1] &&
-          pixelRgb[2] === targetRgb[2]
-      );
-  }
-
-  loadRoomFromSprite(_scene, _pathToMap) {
-    // Create groups for platforms, coins, and enemies.
-    const platforms = _scene.physics.add.staticGroup();
-    const coins = _scene.physics.add.group();
-    var player = null;
-    _scene.enemies = _scene.physics.add.group();
-
-    // Create a local GameMap instance using the provided map path.
-    let localMap = new GameMap(_pathToMap);
-
-    localMap.load().then(() => {
-        const myObjects = localMap.createGameObjectsArray();
-
-        myObjects.forEach(obj => {
-            switch (obj.type) {
+const TILE_SIZE = 64;
+const VIEW_SIZE = 640;
+/**
+ * EntityManager is responsible for creating and managing game entities.
+ * It creates Phaser groups for platforms, coins, enemies, and stores the player.
+ * TODO: Consider moving this class into its own file.
+ */
+export class EntityManager {
+    constructor(scene) {
+        this.scene = scene;
+        this.groups = {
+            platforms: scene.physics.add.staticGroup(),
+            coins: scene.physics.add.staticGroup(),
+            enemies: scene.physics.add.group(),
+            player: null
+        };
+    }
+    
+    populateEntities(objects) {
+        for (const { type, x, y } of objects) {
+            switch (type) {
                 case 'player':
-                    player = new Player(_scene, obj.x * 64, obj.y * 64);
+                    this.groups.player = new Player(this.scene, x + 32, y+ 32);
                     break;
-
-                case 'platform':
-                    let platform = platforms.create(obj.x * 64 + 32, obj.y * 64 + 32, 'platforms', 'platform_tile');
-                    if (platform.body) {
-                      platform.body.immovable = true;
-                      platform.body.allowGravity = false;
-                    }
+                case 'platforms':
+                    this.groups.platforms.create(x+ 32, y+ 32, 'platforms','platform_tile');
                     break;
-
-                case 'coin':
-                    let coin = coins.create(obj.x * 64 + 32, obj.y * 64 + 32, 'coin');
-                    if (coin.body) {
-                      coin.body.immovable = true;
-                      coin.body.allowGravity = false;
-                    }
+                case 'coins':
+                    this.groups.coins.create(x+ 32, y+ 32, 'coin');
                     break;
-
-                case 'enemy': 
-                    let enemy = new Enemy(_scene, obj.x * 64 + 32, obj.y * 64 + 32);
-                    _scene.enemies.add(enemy);
+                case 'enemies':
+                    this.groups.enemies.add(new Enemy(this.scene, x+ 32, y+ 32,100));
                     break;
+                // TODO: Handle additional object types as necessary.
+            }
+        }
+    }
+    
+    cleanup() {
+        // Clean up scene references for entities, if necessary.
+        const scene = this.scene;
+        ['platforms', 'coins', 'enemies'].forEach(group => {
+            if (scene[group]) {
+                scene.physics.world.removeCollider(scene[`${group}Collider`]);
+                scene[group].destroy(true);
+                scene[group] = null;
             }
         });
-        _scene.player = player;
-        // Only add player-related colliders and camera follow if the player was created.
-        if (_scene.player) {
-            _scene.physics.add.collider(_scene.player, platforms);
-            _scene.physics.add.overlap(_scene.player, coins, (player, coin) => {
-                coin.destroy();
-                _scene.events.emit('coinCollected');
-            });
-            _scene.cameras.main.startFollow(_scene.player);
-        } else {
-            console.error("Player not found in map.");
+    
+        if (scene.player) {
+            scene.player.destroy();
+            scene.player = null;
         }
-        
-        _scene.physics.add.collider(_scene.enemies, platforms);
-    }).catch(err => console.error(err));
-  }
+    }
 }
 
-// Export a global instance if needed; note that its imageSrc is undefined.
-// It is not used by loadRoomFromSprite since that creates a new instance.
+export class GameMap {
+    constructor(imageSrc) {
+        this.imageSrc = imageSrc;
+        // TODO: Consider removing the colors mapping here if extraction is fully delegated to SpriteMapExtractor.
+        this.colors = this._defineColors();
+        this.pendingLoad = null;
+        this.scaleFactor = TILE_SIZE; // Scale factor for the visible canvas
+    }
+
+    _defineColors() {
+        return {
+            platforms: [0, 0, 0],    // Black
+            enemies: [255, 0, 0],    // Red
+            player: [0, 0, 255],     // Blue
+            coins: [255, 255, 0],    // Yellow
+            placeholder: [0, 255, 0] // Green
+        };
+    }
+
+    // Note: The old load() method is deprecated since SpriteMapExtractor now handles image loading.
+    // TODO: Remove this method if SpriteMapExtractor becomes the sole image loader.
+
+    async loadIntoScene(scene, pathToMap) {
+        // Clean up previous scene references (groups, colliders, etc.)
+        this._cleanSceneReferences(scene);
+        
+        // Use the new SpriteMapExtractor to load and extract map data.
+        const extractor = new SpriteMapExtractor(pathToMap, TILE_SIZE);
+        await extractor.loadImage();
+
+        // Create a visible canvas for scene display based on the loaded image.
+        const visibleCanvas = document.createElement('canvas');
+        visibleCanvas.width = VIEW_SIZE;
+        visibleCanvas.height = VIEW_SIZE;
+        const visibleCtx = visibleCanvas.getContext('2d');
+        
+        // Clear with a background color to prevent "changing background" issues
+        //visibleCtx.fillStyle = '#000'; // Set this to any background color you prefer
+        visibleCtx.clearRect(0, 0, VIEW_SIZE, VIEW_SIZE);
+        
+        const textureKey = `map-${Date.now()}`;
+        scene.textures.addCanvas(textureKey, visibleCanvas);
+
+        // Extract game objects from the sprite image.
+        const objects = extractor.extractObjects();
+
+        // Use the new EntityManager to handle entity instancing.
+        const entityManager = new EntityManager(scene);
+        entityManager.populateEntities(objects);
+    
+        // Assign entity groups to scene.
+        Object.assign(scene, {
+            player: entityManager.groups.player,
+            enemies: entityManager.groups.enemies,
+            coins: entityManager.groups.coins,
+            platforms: entityManager.groups.platforms
+        });
+    
+        // Set up physics colliders and camera follow.
+        scene.physics.add.collider(entityManager.groups.player, entityManager.groups.platforms);
+        if (!entityManager.groups.player) {
+            console.error('Player is null! Cannot follow player.');
+        } else {
+            scene.cameras.main.startFollow(entityManager.groups.player);
+        }
+        scene.physics.add.collider(entityManager.groups.enemies, entityManager.groups.platforms);
+        scene.physics.add.collider(entityManager.groups.coins, entityManager.groups.platforms);
+        
+        const width = extractor.img.width * TILE_SIZE;
+        const height = extractor.img.height * TILE_SIZE;
+        
+        //scene.scale.resize(width, height);
+        scene.physics.world.setBounds(0, 0, width, height);
+    
+        scene.events.emit('levelLoaded');
+        // TODO: Review cleanup timing if persistent resources are needed.
+    
+        this._clampCamera(scene, extractor);
+        
+        // Clean up extractor resources if needed.
+        this._cleanupLocalMap(extractor);
+        
+        return textureKey;
+    }
+    
+    _cleanSceneReferences(scene) {
+        ['platforms', 'coins', 'enemies'].forEach(group => {
+            if (scene[group]) {
+                scene.physics.world.removeCollider(scene[`${group}Collider`]);
+                scene[group].destroy(true);
+                scene[group] = null;
+            }
+        });
+    
+        if (scene.player) {
+            scene.player.destroy();
+            scene.player = null;
+        }
+    }
+    
+    _clampCamera(scene, extractor) {
+        const mapWidth = extractor.img.width * TILE_SIZE;
+        const mapHeight = extractor.img.height * TILE_SIZE;
+    
+        // Keep the camera's viewport fixed
+        scene.cameras.main.setViewport(
+            (scene.scale.width - VIEW_SIZE) / 2, // Center horizontally
+            (scene.scale.height - VIEW_SIZE) / 2, // Center vertically
+            VIEW_SIZE,
+            VIEW_SIZE
+        );
+    
+        // Clamp camera movement within map bounds
+        scene.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
+    }
+    
+    _cleanupLocalMap(extractor) {
+        if (extractor.img) {
+            Object.assign(extractor.img, { onload: null, onerror: null, src: '' });
+        }
+    
+        if (extractor.hiddenCanvas) {
+            extractor.hiddenCtx?.clearRect(0, 0, extractor.hiddenCanvas.width, extractor.hiddenCanvas.height);
+            Object.assign(extractor.hiddenCanvas, { width: 0, height: 0 });
+        }
+    
+        // visibleCanvas is managed separately in loadIntoScene; add cleanup here if necessary.
+        // TODO: Consider integrating visible canvas management into SpriteMapExtractor.
+    }
+}
+
 export const gameMap = new GameMap();
