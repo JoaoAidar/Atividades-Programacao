@@ -1,0 +1,12 @@
+{
+    "frames": {
+      "platform_tile": {
+        "frame": { "x": 384, "y": 254, "w": 64, "h": 64 }
+      }
+    },
+    "meta": {
+      "image": "atlas.png",
+      "size": { "w": 512, "h": 512 }
+    }
+  }
+  

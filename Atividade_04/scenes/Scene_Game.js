@@ -1,63 +1,81 @@
 import Phaser from '../phaser.js';
+import LevelManager  from '../utils/levelManager.js';
 import { gameMap } from '../utils/worldBuilder.js';
-import Player from '../common/entities/Player.js';
-import Coin from '../common/entities/Coin.js';
-import Enemy from '../common/entities/Enemy.js'; // Import the Enemy class
 
 export class Scene_Game extends Phaser.Scene {
     constructor() {
         super({ key: 'Scene_Game' });
     }
 
+    init(data) {
+        this.levelManager = new LevelManager(this);
+        this.currentLevel = data.level || 1;
+    }
+
     preload() {
-        this.load.image('player', 'assets/sprPlayer.png');
-        this.load.image('platform', 'assets/sprPlatform.png');
+        this.load.atlas('platforms', 'assets/platform_tileset/tilesetPlatforms.png', 'assets/platform_tileset/tilesetPlatforms.json');
         this.load.image('coin', 'assets/sprCoin.png');
         this.load.image('enemy', 'assets/sprEnemy.png');
+        this.load.image('player', 'assets/sprPlayer.png');
     }
-
+        
     create() {
-        this.map = gameMap;
+        // Load the map for the current level
+        const mapPath = this.levelManager.getLevelMap(this.currentLevel);
+        if (mapPath) {
+            // Assume loadRoomFromSprite now returns an object with game entities
+            const roomData = gameMap.getGameObjects();
 
-        // Load the room (and add enemies) from the map
-        this.map.loadRoomFromSprite(this, 'assets/mapScene03.png');  // This will automatically create `this.enemies`
-
-        // Set up the camera and world bounds
-        this.cameras.main.setBounds(0, 0, this.map.img.width * 64, this.map.img.height * 64);
-        this.physics.world.setBounds(0, 0, this.map.img.width * 64, this.map.img.height * 64);
-
-        // Ensure player is colliding with world bounds
-        if (this.player) {
-           this.player.setCollideWorldBounds(true);
+            // Assign the objects from the returned data
+            this.player = roomData.player;
+            this.enemies = roomData.enemies || this.add.group();
+            this.coins = roomData.coins || this.add.group();
+        } else {
+            console.error("No map found for level", this.currentLevel);
         }
 
-        this.cursors = this.input.keyboard.createCursorKeys();
+        // Check that the player exists and has a physics body
+        if (!this.player) {
+            console.error("Player is undefined after loading the map!");
+            return;
+        }
 
-        // Ensure enemies group is correctly populated
-        this.enemies = this.add.group({
-            classType: Enemy,  // Use your Enemy class
-            runChildUpdate: true  // Automatically call update() on each child
-        });
-
-        // Make sure enemies are properly added to the group after creation
-        this.map.loadRoomFromSprite(this, 'assets/mapScene03.png');
-        
-        // Detect collision between the player and the enemies
-       // this.physics.add.overlap(this.player, this.enemies, this.handlePlayerEnemyOverlap, null, this);
+        // Set up physics overlaps for coin collection
+        this.physics.add.overlap(this.player, this.coins, this.collectCoin, null, this);
     }
     
-
-
-    update() {
+    update(time, delta) {
         if (this.player) {
-            this.player.update(this.cursors);
+            this.player.update(time, delta); // Update player movement
         }
+    
+        if (this.enemies) {
+            this.enemies.children.iterate(enemy => {
+                if (enemy && enemy.update) {
+                    enemy.update(time, delta);
+                }
+            });
+        }
+    }
 
-        // Ensure proper handling of enemies in the group
-        this.enemies.getChildren().forEach(enemy => {
-            if (enemy instanceof Enemy) {  // Check if the object is an instance of the Enemy class
-                enemy.update();  // Call the enemy's update method
-            }
-        });
+    // Called when player overlaps with a coin
+    collectCoin(player, coin) {
+        coin.destroy();
+        // Optionally update score here
+
+        // Check if all coins have been collected
+        if (this.coins.getChildren().length === 0) {
+            this.loadNextLevel();
+        }
+    }
+
+    loadNextLevel() {
+        const nextLevel = this.levelManager.getNextLevel();
+        if (nextLevel) {
+            this.scene.restart({ level: nextLevel });
+        } else {
+            console.log("No more levels available!");
+            this.scene.start('Scene_MainMenu');
+        }
     }
 }

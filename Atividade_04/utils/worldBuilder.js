@@ -1,6 +1,5 @@
-
 import Player from '../common/entities/Player.js'; // Adjust the import path as necessary
-import Enemy from '../common/entities/Enemy.js'; // Adjust the import path as necessary
+import Enemy from '../common/entities/Enemy.js';   // Adjust the import path as necessary
 
 export class GameMap {
   constructor(imageSrc) {
@@ -9,9 +8,9 @@ export class GameMap {
       this.colors = {
           white: [255, 255, 255],
           black: [0, 0, 0],
-          red: [255, 0, 0],   // Enemies are red
-          green: [0, 255, 0], // Placeholder for goal or other objects
-          blue: [0, 0, 255],  // Player is blue
+          red: [255, 0, 0],    // Enemies are red
+          green: [0, 255, 0],  // Placeholder for goal or other objects
+          blue: [0, 0, 255],   // Player is blue
           yellow: [255, 255, 0], // Coins are yellow
           fuchsia: [255, 0, 255],
           aqua: [0, 255, 255]
@@ -77,7 +76,9 @@ export class GameMap {
       }
       return gameObjects;
   }
-  
+  getGameObjects() {
+    return gameObjects;
+  }
   roundPixel(pixelRgb) {
       const pixel = [];
       for (let k = 0; k < 3; k++) {
@@ -99,60 +100,64 @@ export class GameMap {
   }
 
   loadRoomFromSprite(_scene, _pathToMap) {
-      const platforms = _scene.physics.add.staticGroup();
-      const coins = _scene.physics.add.group();
-      const enemies = _scene.physics.add.group(); // This group will handle all enemies
-      
-      _scene.GameMap = new GameMap(_pathToMap);
+    // Create groups for platforms, coins, and enemies.
+    const platforms = _scene.physics.add.staticGroup();
+    const coins = _scene.physics.add.group();
+    var player = null;
+    _scene.enemies = _scene.physics.add.group();
 
-      _scene.GameMap.load().then(() => {
-          const mapWidth = _scene.GameMap.img.width * 64;
-          const mapHeight = _scene.GameMap.img.height * 64;
+    // Create a local GameMap instance using the provided map path.
+    let localMap = new GameMap(_pathToMap);
 
-          _scene.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
-          _scene.physics.world.setBounds(0, 0, mapWidth, mapHeight);
+    localMap.load().then(() => {
+        const myObjects = localMap.createGameObjectsArray();
 
-          const myObjects = _scene.GameMap.createGameObjectsArray();
-          
-          myObjects.forEach(obj => {
-              switch (obj.type) {
-                  case 'player':
-                      _scene.player = new Player(_scene, obj.x * 64, obj.y * 64);
-                      _scene.player.setCollideWorldBounds(true);
-                      break;
-                  case 'platform':
-                      const platform = platforms.create(obj.x * 64 + 32, obj.y * 64 + 32, 'platform');
+        myObjects.forEach(obj => {
+            switch (obj.type) {
+                case 'player':
+                    player = new Player(_scene, obj.x * 64, obj.y * 64);
+                    break;
+
+                case 'platform':
+                    let platform = platforms.create(obj.x * 64 + 32, obj.y * 64 + 32, 'platforms', 'platform_tile');
+                    if (platform.body) {
                       platform.body.immovable = true;
                       platform.body.allowGravity = false;
-                      break;
-                  case 'coin':
-                      const coin = coins.create(obj.x * 64 + 32, obj.y * 64 + 32, 'coin');
+                    }
+                    break;
+
+                case 'coin':
+                    let coin = coins.create(obj.x * 64 + 32, obj.y * 64 + 32, 'coin');
+                    if (coin.body) {
                       coin.body.immovable = true;
                       coin.body.allowGravity = false;
-                      break;
-                  case 'enemy': 
-                      // Manually instantiate the enemy
-                      const enemy = new Enemy(_scene, obj.x * 64 + 32, obj.y * 64 + 32);
-                      _scene.enemies.add(enemy); // Add the instantiated enemy to the enemies group
-                      break;
-              }
-          });
+                    }
+                    break;
 
-          _scene.physics.add.collider(_scene.player, platforms);
-          _scene.physics.add.overlap(_scene.player, coins, (player, coin) => {
-              coin.destroy();
-          });
-          _scene.physics.add.collider(_scene.enemies, platforms);
-          //_scene.physics.add.collider(coins, platforms);
-
-
-
-          // Make the camera follow the player
-          if (_scene.player) {
-              _scene.cameras.main.startFollow(_scene.player);
-          }
-      }).catch(err => console.error(err));
+                case 'enemy': 
+                    let enemy = new Enemy(_scene, obj.x * 64 + 32, obj.y * 64 + 32);
+                    _scene.enemies.add(enemy);
+                    break;
+            }
+        });
+        _scene.player = player;
+        // Only add player-related colliders and camera follow if the player was created.
+        if (_scene.player) {
+            _scene.physics.add.collider(_scene.player, platforms);
+            _scene.physics.add.overlap(_scene.player, coins, (player, coin) => {
+                coin.destroy();
+                _scene.events.emit('coinCollected');
+            });
+            _scene.cameras.main.startFollow(_scene.player);
+        } else {
+            console.error("Player not found in map.");
+        }
+        
+        _scene.physics.add.collider(_scene.enemies, platforms);
+    }).catch(err => console.error(err));
   }
 }
 
+// Export a global instance if needed; note that its imageSrc is undefined.
+// It is not used by loadRoomFromSprite since that creates a new instance.
 export const gameMap = new GameMap();

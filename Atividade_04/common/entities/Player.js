@@ -1,4 +1,3 @@
-// Player.js
 import Phaser from '../../phaser.js';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
@@ -6,17 +5,19 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, 'player');
         scene.add.existing(this);
         scene.physics.add.existing(this);
-
         this.setCollideWorldBounds(true);
-        // Additional player-specific setup can go here
+        
+        // Initialize the cursors inside the player object
+        this.cursors = scene.input.keyboard.createCursorKeys();
+
     }
 
     // Define player-specific methods here
-    update(cursors) {
-        if (cursors.left.isDown) {
+    update(time, delta) {
+        if (this.cursors.left.isDown) {
             this.setVelocityX(-160);
             //this.anims.play('left', true);
-        } else if (cursors.right.isDown) {
+        } else if (this.cursors.right.isDown) {
             this.setVelocityX(160);
             //this.anims.play('right', true);
         } else {
@@ -24,7 +25,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             //this.anims.play('turn');
         }
 
-        if (cursors.up.isDown && this.body.touching.down) {
+        if (this.cursors.up.isDown && this.body.touching.down) {
             this.setVelocityY(-450);
         }
     }
