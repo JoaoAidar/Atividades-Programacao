@@ -9,22 +9,22 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.body.onWorldBounds = true;
         this.speed = speed;  // Make sure to store speed as a property
 
-        console.log("Initial Velocity:", this.body.velocity.x); // Check initial velocity
+    //    console.log("Initial Velocity:", this.body.velocity.x); // Check initial velocity
     }
 
     update(time, delta) {
-        console.log('Enemy updating:', this.x, this.y, "Velocity:", this.body.velocity.x);
+    //    console.log('Enemy updating:', this.x, this.y, "Velocity:", this.body.velocity.x);
         this.moveSideToSide();
     }
 
     moveSideToSide() {
-        console.log("Blocked Left:", this.body.blocked.left, "Blocked Right:", this.body.blocked.right);
+       // console.log("Blocked Left:", this.body.blocked.left, "Blocked Right:", this.body.blocked.right);
 
         if (this.body.blocked.left) {
-            console.log("Switching to RIGHT");
+            //console.log("Switching to RIGHT");
             this.setVelocityX(Math.abs(this.speed));
         } else if (this.body.blocked.right) {
-            console.log("Switching to LEFT");
+            //console.log("Switching to LEFT");
             this.setVelocityX(-Math.abs(this.speed));
         } else {
             // If not blocked, keep moving in the current direction

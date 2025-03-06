@@ -44,7 +44,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             this.canDoubleJump = false;
         }
     }
-
+    handleTakingDamage(enemy){
+        
+    }
     // This method will be called from the scene to handle collisions with enemies
     handleFallOnEnemy(enemy) {
         // Check if the player is falling on top of the enemy (velocity.y > 0 means falling)

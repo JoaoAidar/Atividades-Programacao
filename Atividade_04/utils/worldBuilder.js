@@ -27,7 +27,7 @@ export class EntityManager {
                     this.groups.player = new Player(this.scene, x + 32, y+ 32);
                     break;
                 case 'platforms':
-                    this.groups.platforms.create(x+ 32, y+ 32, 'platforms','platform_tile');
+                    this.groups.platforms.create(x+ 32, y+ 32, 'platform');
                     break;
                 case 'coins':
                     this.groups.coins.create(x+ 32, y+ 32, 'coin');
@@ -157,7 +157,9 @@ export class GameMap {
             scene.player = null;
         }
     }
-    
+    _getMapWidth() {
+        return extractor.img.width * TILE_SIZE;
+    }
     _clampCamera(scene, extractor) {
         const mapWidth = extractor.img.width * TILE_SIZE;
         const mapHeight = extractor.img.height * TILE_SIZE;

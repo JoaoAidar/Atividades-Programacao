@@ -7,6 +7,7 @@ export class Scene_Game extends Phaser.Scene {
         super({ key: 'Scene_Game' });
         /** @type {Phaser.Physics.Arcade.Collider[]} */
         this.physicsHandlers = [];
+        this.parallaxLayers = [];
     }
 
     /**
@@ -28,16 +29,16 @@ export class Scene_Game extends Phaser.Scene {
      * Assets are loaded only once, checking if they already exist.
      */
     preload() {
-        if (!this.textures.exists('platforms')) {
-            this.load.atlas(
-                'platforms',
-                'assets/platform_tileset/tilesetPlatforms.png',
-                'assets/platform_tileset/tilesetPlatforms.json'
-            );
             this.load.image('coin', 'assets/sprCoin.png');
             this.load.image('enemy', 'assets/sprEnemy.png');
             this.load.image('player', 'assets/sprPlayer.png');
-        }
+            this.load.image('platform', 'assets/sprPlatform.png');
+        
+
+            // Load parallax background layers
+            this.load.image('bg_far', 'assets/moon_parallax/moon_sky.png');
+            this.load.image('bg_mid', 'assets/moon_parallax/moon_mid.png');
+            this.load.image('bg_near', 'assets/moon_parallax/moon_front.png');
     }
 
     /**
@@ -45,6 +46,9 @@ export class Scene_Game extends Phaser.Scene {
      * Loads the level map, sets up the physics, and initializes the camera.
      */
     create() {
+        const worldWidth = this.levelManager.getWorldWidth ? this.levelManager.getWorldWidth() : this.scale.width;
+        const worldHeight = this.levelManager.getWorldHeight ? this.levelManager.getWorldHeight() : this.scale.height;
+
         // Get the map path from the level manager for the current level.
         const mapPath = this.levelManager.getLevelMap(this.currentLevel);
         if (!mapPath) {
@@ -55,7 +59,6 @@ export class Scene_Game extends Phaser.Scene {
         // Load the map into the scene.
         // gameMap.loadIntoScene returns a texture reference used for cleanup.
         this.mapTexture = gameMap.loadIntoScene(this, mapPath);
-
         // Once the level is fully loaded, set up the physics and camera.
         this.events.once('levelLoaded', () => {
             if (!this.player) {
@@ -65,6 +68,11 @@ export class Scene_Game extends Phaser.Scene {
             this.setupPhysics();
             this.setupCamera();
         });
+        this.parallaxLayers.push(
+            this.add.tileSprite(0, 0, worldWidth, worldHeight, 'bg_far').setOrigin(0, 0).setScrollFactor(0),
+            this.add.tileSprite(0, 0, worldWidth, worldHeight, 'bg_mid').setOrigin(0, 0).setScrollFactor(0),
+            this.add.tileSprite(0, 0, worldWidth, worldHeight, 'bg_near').setOrigin(0, 0).setScrollFactor(0)
+        );
     }
 
     /**
@@ -77,6 +85,12 @@ export class Scene_Game extends Phaser.Scene {
         this.player?.update(time, delta);
         //console.log(this.enemies?.getChildren());
         this.enemies?.getChildren().forEach(enemy => enemy?.update?.(time, delta));
+
+        const cameraX = this.cameras.main.scrollX;
+        console.log(cameraX);
+        this.parallaxLayers[0].tilePositionX = -cameraX * 0.2; // Far background
+        this.parallaxLayers[1].tilePositionX = -cameraX * 0.5; // Mid background
+        this.parallaxLayers[2].tilePositionX = -cameraX * .8; // Near background
     }
 
     /**
@@ -180,7 +194,6 @@ export class Scene_Game extends Phaser.Scene {
         const worldWidth = this.levelManager.getWorldWidth ? this.levelManager.getWorldWidth() : this.scale.width;
         const worldHeight = this.levelManager.getWorldHeight ? this.levelManager.getWorldHeight() : this.scale.height;
         camera.setBounds(0, 0, worldWidth, worldHeight);
-        
         // Optionally set camera zoom. Adjust as needed.
         camera.setZoom(1);
         
