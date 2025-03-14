@@ -23,9 +23,10 @@ console.log(y);
 let y = 10;
 ```
 
-//CORRETA É A
+CORRETA É: A
 
-Explicação: Quando setamos x usando var, garantimos que ela terá um espaço indexado na memória. Porém, quando usamos console.log() antes de atribuir um valor a x, o output será undefined. O let é uma variável de uso local e alocada dinamicamente, então quando tentamos acessar y pelo console.log(), teremos um erro.
+Justificativa: Quando setamos x usando var, garantimos que ela terá um espaço indexado na memória. Porém, quando usamos console.log() antes de atribuir um valor a x, o output será undefined. O let é uma variável de uso local e alocada dinamicamente, então quando tentamos acessar y pelo console.log(), teremos um erro.
+
 a) A saída será undefined seguido de erro 
 
 b) A saída será 5 seguido de 10
@@ -47,9 +48,10 @@ function soma(a, b) {
 console.log(soma(2, 0));
 ```
 
-//CORRETA D
+CORRETA É:D
 
-O zero é o elemento neutro da adição e da subtração, portanto, somar ou não por zero não afeta o resultado final.
+Justificativa: O zero é o elemento neutro da adição e da subtração, portanto, somar ou não por zero não afeta o resultado final.
+
 a) Substituir if (a || b === 0) por if (a === 0 || b === 0)
 
 b) Substituir if (a || b === 0) por if (a === 0 && b === 0)
@@ -82,8 +84,9 @@ function calcularPreco(tipo) {
 
 console.log(calcularPreco("eletrônico"));
 ```
-Correto: B 
+Correta é: B 
 A cláusula de eletrônicos no switch não tem um break, fazendo preço ser igual a próxima linha (200). 
+
 a) O código imprime 1000.
 
 b) O código imprime 200.
@@ -95,10 +98,7 @@ d) O código gera um erro.
 ______
 **4) Ao executar esse código, qual será a saída no console? Indique a alternativa correta e justifique sua resposta.**
 
-CORRETA É: D
 
-3
-o numeros.map vai iterar pelos números multiplicando cada entry por 2. Logo em seguida, pra todo elemento maior que 5, os somaremos para obter 24 (6 + 8 + 10 )
 ```javascript
 let numeros = [1, 2, 3, 4, 5];
 
@@ -106,6 +106,14 @@ let resultado = numeros.map(x => x * 2).filter(x => x > 5).reduce((a, b) => a + 
 
 console.log(resultado);
 ```
+
+Correta é: D
+
+Justificativa: Aplicando as funções ao input numeros, temos a seguinte progressão:
+
+Inicialmente, a array é [1,2,3,4,5]
+Aplicando a primeira função, iteramos por todos os itens e os multiplicamos por 2. Logo, temos como output [2,4,6,8,10].
+Em seguida, filtramos os itens menores que 5 e somamos os itens remanescentes. [6,8,10] que somados dão 24.
 a) 0
 
 b) 6
@@ -122,7 +130,7 @@ lista.splice(1, 2, "abacaxi", "manga");
 console.log(lista);
 ```
 CORRETA É: C. 
-O método .splice() vai substituir entries 1 e 2 por abacaxi e manga.
+Justificativa: O método .splice() vai substituir os valores dos indexes 1 e 2 por "abacaxi" e "manga" respectivamente.
 
 a) ["banana", "maçã", "uva", "abacaxi", "manga", "laranja"]
 
@@ -182,12 +190,12 @@ III) O código não funciona corretamente, pois Funcionario não pode herdar de 
 
 Quais das seguintes afirmações são verdadeiras sobre o código acima?
 
-CORRETA É: C
-I - A classe funcionário só pode acessar nome e idade diretamente se forem atributos públicos. No caso de privados, o acesso se torna restrito. 
-Logo, é falsa
-II - É verdade, usa-se o super.apresentar() para chamar o método da classe pai. 
-III - É falsa, o JS suporta herança
+CORRETA É: A
 
+Justificativa: 
+I-Verdadeira. Se os campos forem públicos, a classe Funcionário consegue acessar os valores.
+II-Verdadeira. Quando setamos um método homônimo na classe filha, o método do parent é sobrescrito. Podemos ainda acessá-lo com super. 
+III-Falso. JavaScript suporta herança de classes, logo, a afirmação é incorreta
 
 a) I e II são verdadeiras.
 
