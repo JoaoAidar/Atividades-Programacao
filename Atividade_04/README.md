@@ -5,6 +5,7 @@ Em "The Fate of the Moon", Hyeju, uma personagem presa na lua, precisa se recomp
 
 A LOONALORE é um universo fictício e complexo, criado como parte da mitologia por trás do grupo musical LOONA. Este universo é composto por várias histórias interconectadas que exploram temas de destinos, poderes cósmicos e eventos apocalípticos. Dentro da LOONALORE, Hyeju é uma das protagonistas, cujos eventos estão entrelaçados com mistérios e forças cósmicas que impactam o destino da humanidade e do universo. "The Fate of the Moon" se baseia nesse lore, onde Hyeju precisa alcançar seu propósito e trazer as consequências de suas ações para o mundo.
 
+<<<<<<< Updated upstream
 ## Controles
 - **Seta Direita**: Move Hyeju para a direita.
 - **Seta Esquerda**: Move Hyeju para a esquerda.
@@ -18,6 +19,11 @@ https://github.com/JoaoAidar/Atividades-Programacao/tree/main/Atividade_04
 https://joaoaidar.github.io/Atividades-Programacao/Atividade_04/
 
 <<<<<<< Updated upstream
+=======
+https://muchopixels.itch.io/character-animation-asset-pack
+
+https://bongseng.itch.io/parallax-forest-desert-sky-moon
+>>>>>>> Stashed changes
 =======
 https://muchopixels.itch.io/character-animation-asset-pack
 
