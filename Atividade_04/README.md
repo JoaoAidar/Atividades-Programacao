@@ -17,3 +17,9 @@ https://github.com/JoaoAidar/Atividades-Programacao/tree/main/Atividade_04
 ## Link da versão jogável (GitHub Pages)
 https://joaoaidar.github.io/Atividades-Programacao/Atividade_04/
 
+<<<<<<< Updated upstream
+=======
+https://muchopixels.itch.io/character-animation-asset-pack
+
+https://bongseng.itch.io/parallax-forest-desert-sky-moon
+>>>>>>> Stashed changes
