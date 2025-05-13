@@ -7,11 +7,13 @@ class Hospital{
         this.relatorios = new Stack;
     }
 
+    //Método para receber o paciente no hospital
     receberPaciente(nomePaciente){
         this.pacientes.enqueue(nomePaciente);
         console.log(`Paciente ${nomePaciente} foi colocado na fila de atendimento`);
     }
 
+    //Método para encaminhar o próximo paciente da fila para o atendimento
     atenderPróximo(){
         if(this.pacientes.size != 0){
             let pacienteAtendido = this.pacientes.dequeue();
@@ -20,6 +22,7 @@ class Hospital{
         }
     }
 
+    //Método para documentar o próximo relatório e o remover da stack
     documentarPróximoRelatório(){
         if(this.relatorios.size != 0){
             let relatorioDoc = this.relatorios.destack();
@@ -27,21 +30,25 @@ class Hospital{
         }
     }
 
+    //Print de debugging 
     mostrarFilas(){
         this.pacientes.print();
         this.relatorios.print();
     }
 
+    //Método para achar um paciente na fila de atendimento
     acharPacienteNaFilaDeAtendimento(nomePaciente){
         let tamanhoFila = this.pacientes.size();
         for(var i = 0; i < tamanhoFila; i++){
-            if(this.pacientes[i] == nomePaciente){
+            if(this.pacientes[i] === nomePaciente){
                 console.log("Paciente encontrado! Retornando seu index...");
                 return i;
             }
         }
     }
+
 };
+
 let nomes = ["João","Pedro","Cláudio","Richard","Cristiano","Sérgio","Rui"];
 function simularHospital(tamanhoFilaInicial, arrayNomes){
     var hospital = new Hospital;
@@ -56,7 +63,7 @@ function simularHospital(tamanhoFilaInicial, arrayNomes){
 
     hospital.atenderPróximo();
     hospital.atenderPróximo();
-
+    console.log(hospital.acharPacienteNaFilaDeAtendimento("Cláudio"));
     hospital.mostrarFilas();
 
     hospital.documentarPróximoRelatório();
